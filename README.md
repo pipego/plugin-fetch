@@ -35,6 +35,7 @@ make build
 
 ## Usage
 
+- `plugin/localhost.go`: Fetch node info from localhost.
 - `plugin/metalflow.go`: Fetch node info from [metalflow](https://github.com/devops-metalflow).
 
 
@@ -51,4 +52,10 @@ Project License can be found [here](LICENSE).
 
 ## Reference
 
+<<<<<<< HEAD
 - [go-plugin](https://github.com/hashicorp/go-plugin)
+=======
+- [go-osstat](https://github.com/mackerelio/go-osstat)
+- [go-plugin](https://github.com/hashicorp/go-plugin)
+- [gopsutil](https://github.com/shirou/gopsutil)
+>>>>>>> f97e18a (feat)

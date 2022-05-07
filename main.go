@@ -12,16 +12,22 @@ import (
 )
 
 type config struct {
-	args *proto.Args
+	host string
 	name string
 	path string
 }
 
 var (
 	configs = []config{
+		// Plugin: LocalHost
+		{
+			host: "127.0.0.1",
+			name: "LocalHost",
+			path: "./plugin/fetch-localhost",
+		},
 		// Plugin: MetalFlow
 		{
-			args: &proto.Args{},
+			host: "127.0.0.1",
 			name: "MetalFlow",
 			path: "./plugin/fetch-metalflow",
 		},
@@ -30,16 +36,14 @@ var (
 
 func main() {
 	for _, item := range configs {
-		status, _ := helper(item.path, item.name, item.args)
-		if status.Error == "" {
-			fmt.Println(item.name + ": pass")
-		} else {
-			fmt.Println(status.Error)
-		}
+		result, _ := helper(item.path, item.name, item.host)
+
+		fmt.Println(result.AllocatableResource.MilliCPU, result.AllocatableResource.Memory, result.AllocatableResource.Storage)
+		fmt.Println(result.RequestedResource.MilliCPU, result.RequestedResource.Memory, result.RequestedResource.Storage)
 	}
 }
 
-func helper(path, name string, args *proto.Args) (proto.Status, error) {
+func helper(path, name, host string) (proto.Result, error) {
 	config := plugin.HandshakeConfig{
 		ProtocolVersion:  1,
 		MagicCookieKey:   "plugin-fetch",
@@ -67,7 +71,7 @@ func helper(path, name string, args *proto.Args) (proto.Status, error) {
 	rpcClient, _ := client.Client()
 	raw, _ := rpcClient.Dispense(name)
 	n := raw.(proto.Fetch)
-	status := n.Fetch(args)
+	result := n.Fetch(host)
 
-	return status, nil
+	return result, nil
 }

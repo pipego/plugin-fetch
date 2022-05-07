@@ -76,20 +76,21 @@ type Resource struct {
 type Selector map[string][]string
 
 type Fetch interface {
-	Fetch(*Args) Status
+	Fetch(host string) Result
 }
 
-type Status struct {
-	Error string
+type Result struct {
+	AllocatableResource Resource
+	RequestedResource   Resource
 }
 
 type FetchRPC struct {
 	client *rpc.Client
 }
 
-func (n *FetchRPC) Fetch(args *Args) Status {
-	var resp Status
-	if err := n.client.Call("Plugin.Fetch", args, &resp); err != nil {
+func (n *FetchRPC) Fetch(host string) Result {
+	var resp Result
+	if err := n.client.Call("Plugin.Fetch", host, &resp); err != nil {
 		panic(err)
 	}
 	return resp
@@ -99,8 +100,8 @@ type FetchRPCServer struct {
 	Impl Fetch
 }
 
-func (n *FetchRPCServer) Fetch(args *Args, resp *Status) error {
-	*resp = n.Impl.Fetch(args)
+func (n *FetchRPCServer) Fetch(host string, resp *Result) error {
+	*resp = n.Impl.Fetch(host)
 	return nil
 }
 

@@ -6,19 +6,14 @@ import (
 	"github.com/pipego/plugin-fetch/proto"
 )
 
-const (
-	ErrReasonMetalFlow = "MetalFlow: node(s) didn't return node info"
-)
-
 type MetalFlow struct{}
 
-func (n *MetalFlow) Fetch(args *proto.Args) proto.Status {
-	var status proto.Status
+func (n *MetalFlow) Fetch(host string) proto.Result {
+	var result proto.Result
 
 	// TODO
-	status.Error = ErrReasonMetalFlow
 
-	return status
+	return result
 }
 
 // nolint:typecheck
