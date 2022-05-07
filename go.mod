@@ -5,6 +5,7 @@ go 1.17
 require (
 	github.com/hashicorp/go-hclog v0.14.1
 	github.com/hashicorp/go-plugin v1.4.4
+	github.com/pkg/errors v0.9.1
 	github.com/shirou/gopsutil/v3 v3.22.4
 )
 

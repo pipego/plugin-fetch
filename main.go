@@ -27,7 +27,7 @@ var (
 		},
 		// Plugin: MetalFlow
 		{
-			host: "127.0.0.1",
+			host: "http://127.0.0.1:4523/mock/954718",
 			name: "MetalFlow",
 			path: "./plugin/fetch-metalflow",
 		},
