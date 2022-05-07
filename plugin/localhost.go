@@ -52,6 +52,7 @@ func (n *LocalHost) MilliCPU() (alloc int64, request int64) {
 		return -1, -1
 	}
 
+	// FIXME: Got error on MacOS 10.13.6
 	p, err := cpu.Percent(0, false)
 	if err != nil {
 		return -1, -1
