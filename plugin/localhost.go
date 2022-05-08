@@ -25,7 +25,7 @@ const (
 
 type LocalHost struct{}
 
-func (n *LocalHost) Fetch(host string) proto.Result {
+func (n *LocalHost) Fetch(_ string) proto.Result {
 	allocatableMilliCPU, requestedMilliCPU := n.MilliCPU()
 	allocatableMemory, requestedMemory := n.Memory()
 	allocatableStorage, requestedStorage := n.Storage()
