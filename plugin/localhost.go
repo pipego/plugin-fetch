@@ -13,6 +13,11 @@ import (
 )
 
 const (
+	// DURATION Duration: 10s = 10*1000ms = 10*1000000000ns
+	DURATION = 10 * 1000000000
+)
+
+const (
 	DEV  = "/dev/"
 	HOME = "/home"
 	ROOT = "/"
@@ -53,7 +58,7 @@ func (n *LocalHost) MilliCPU() (alloc int64, request int64) {
 	}
 
 	// FIXME: Got error on MacOS 10.13.6
-	p, err := cpu.Percent(0, false)
+	p, err := cpu.Percent(DURATION, false)
 	if err != nil {
 		return -1, -1
 	}
