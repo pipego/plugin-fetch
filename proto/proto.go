@@ -52,6 +52,7 @@ type Args struct {
 
 type Node struct {
 	AllocatableResource Resource `json:"allocatableResource"`
+	Host                string   `json:"host"`
 	Label               Label    `json:"label"`
 	Name                string   `json:"name"`
 	RequestedResource   Resource `json:"requestedResource"`
@@ -59,6 +60,7 @@ type Node struct {
 }
 
 type Task struct {
+	Name                   string   `json:"name"`
 	NodeName               string   `json:"nodeName"`
 	NodeSelector           Selector `json:"nodeSelector"`
 	RequestedResource      Resource `json:"requestedResource"`
