@@ -204,7 +204,7 @@ func (n *MetalFlow) node() (alloc proto.Resource, request proto.Resource, err er
 }
 
 func (n *MetalFlow) allocHelper(info map[string]interface{}) (proto.Resource, error) {
-	// "4 CPU (2% Used)"
+	// "4 CPU (2.1% Used)"
 	cpuHelper := func(data string) int64 {
 		buf := strings.Split(data, " ")
 		if len(buf) != 4 {
@@ -242,7 +242,7 @@ func (n *MetalFlow) allocHelper(info map[string]interface{}) (proto.Resource, er
 }
 
 func (n *MetalFlow) requestHelper(info map[string]interface{}) (proto.Resource, error) {
-	// "4 CPU (2% Used)"
+	// "4 CPU (2.1% Used)"
 	cpuHelper := func(data string) int64 {
 		buf := strings.Split(data, " ")
 		if len(buf) != 4 {
@@ -251,8 +251,8 @@ func (n *MetalFlow) requestHelper(info map[string]interface{}) (proto.Resource, 
 		c, _ := strconv.Atoi(buf[0])
 		b := strings.TrimPrefix(buf[2], "(")
 		b = strings.TrimSuffix(b, "%")
-		p, _ := strconv.Atoi(b)
-		return int64(float64(c*p) * 0.01 * 1000)
+		p, _ := strconv.ParseFloat(b, 64)
+		return int64(float64(c) * p * 0.01 * 1000)
 	}
 
 	// "4 GB (2 GB Used)"
