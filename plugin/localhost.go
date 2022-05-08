@@ -52,8 +52,7 @@ func (n *LocalHost) MilliCPU() (alloc int64, request int64) {
 		return -1, -1
 	}
 
-	c = c * 1000
-	if c > math.MaxInt64 {
+	if c*1000 > math.MaxInt64 {
 		return -1, -1
 	}
 
@@ -63,8 +62,7 @@ func (n *LocalHost) MilliCPU() (alloc int64, request int64) {
 		return -1, -1
 	}
 
-	used := float64(c) * p[0]
-	used = used * 1000
+	used := float64(c) * p[0] * 0.01 * 1000
 	if used > math.MaxInt64 {
 		return -1, -1
 	}
