@@ -15,17 +15,19 @@ import (
 )
 
 const (
-	HOST = "http://127.0.0.1:4523/mock/954718"
-	PASS = "pass"
+	URL  = "http://127.0.0.1:4523/mock/954718"
 	USER = "user"
+	PASS = "pass"
 )
 
 type MetalFlow struct {
+	host  string
 	token string
 }
 
-func (n *MetalFlow) Fetch(_ string) proto.Result {
+func (n *MetalFlow) Fetch(host string) proto.Result {
 	var err error
+	n.host = host
 
 	n.token, err = n.login()
 	if err != nil {
@@ -68,7 +70,7 @@ func (n *MetalFlow) jwtToken() (string, error) {
 		return "", errors.Wrap(err, "failed to marshal\n")
 	}
 
-	req, err := http.NewRequest(http.MethodPost, HOST+"/api/v1/base/login", bytes.NewBuffer(body))
+	req, err := http.NewRequest(http.MethodPost, URL+"/api/v1/base/login", bytes.NewBuffer(body))
 	if err != nil {
 		return "", errors.Wrap(err, "failed to request\n")
 	}
@@ -106,7 +108,7 @@ func (n *MetalFlow) jwtToken() (string, error) {
 }
 
 func (n *MetalFlow) idempotenceToken(token string) (string, error) {
-	req, err := http.NewRequest(http.MethodGet, HOST+"/api/v1/base/idempotenceToken", nil)
+	req, err := http.NewRequest(http.MethodGet, URL+"/api/v1/base/idempotenceToken", nil)
 	if err != nil {
 		return "", errors.Wrap(err, "failed to request\n")
 	}
@@ -145,7 +147,7 @@ func (n *MetalFlow) idempotenceToken(token string) (string, error) {
 }
 
 func (n *MetalFlow) node() (alloc proto.Resource, request proto.Resource, err error) {
-	req, err := http.NewRequest(http.MethodGet, HOST+"/api/v1/node/list?address="+HOST, nil)
+	req, err := http.NewRequest(http.MethodGet, URL+"/api/v1/node/list?address="+n.host, nil)
 	if err != nil {
 		return proto.Resource{}, proto.Resource{}, errors.Wrap(err, "failed to request\n")
 	}

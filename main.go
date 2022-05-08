@@ -68,7 +68,7 @@ func helper(path, name string) (proto.Result, error) {
 	rpcClient, _ := client.Client()
 	raw, _ := rpcClient.Dispense(name)
 	n := raw.(proto.Fetch)
-	result := n.Fetch("")
+	result := n.Fetch("127.0.0.1")
 
 	return result, nil
 }
