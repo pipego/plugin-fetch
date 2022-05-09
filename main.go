@@ -6,9 +6,9 @@ import (
 	"os/exec"
 
 	"github.com/hashicorp/go-hclog"
-	"github.com/hashicorp/go-plugin"
+	gop "github.com/hashicorp/go-plugin"
 
-	"github.com/pipego/plugin-fetch/proto"
+	"github.com/pipego/plugin-fetch/common"
 )
 
 type config struct {
@@ -40,8 +40,8 @@ func main() {
 	}
 }
 
-func helper(path, name string) (proto.Result, error) {
-	config := plugin.HandshakeConfig{
+func helper(path, name string) (common.Result, error) {
+	config := gop.HandshakeConfig{
 		ProtocolVersion:  1,
 		MagicCookieKey:   "plugin-fetch",
 		MagicCookieValue: "plugin-fetch",
@@ -53,11 +53,11 @@ func helper(path, name string) (proto.Result, error) {
 		Level:  hclog.Error,
 	})
 
-	plugins := map[string]plugin.Plugin{
-		name: &proto.FetchPlugin{},
+	plugins := map[string]gop.Plugin{
+		name: &common.FetchPlugin{},
 	}
 
-	client := plugin.NewClient(&plugin.ClientConfig{
+	client := gop.NewClient(&gop.ClientConfig{
 		Cmd:             exec.Command(path),
 		HandshakeConfig: config,
 		Logger:          logger,
@@ -67,7 +67,7 @@ func helper(path, name string) (proto.Result, error) {
 
 	rpcClient, _ := client.Client()
 	raw, _ := rpcClient.Dispense(name)
-	n := raw.(proto.Fetch)
+	n := raw.(common.Fetch)
 	result := n.Fetch("127.0.0.1")
 
 	return result, nil

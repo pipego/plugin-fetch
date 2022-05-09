@@ -4,12 +4,13 @@ import (
 	"math"
 	"strings"
 
-	"github.com/hashicorp/go-plugin"
+	gop "github.com/hashicorp/go-plugin"
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/disk"
 	"github.com/shirou/gopsutil/v3/mem"
 
-	"github.com/pipego/plugin-fetch/proto"
+	"github.com/pipego/plugin-fetch/common"
+	"github.com/pipego/scheduler/plugin"
 )
 
 const (
@@ -25,18 +26,18 @@ const (
 
 type LocalHost struct{}
 
-func (n *LocalHost) Fetch(_ string) proto.Result {
+func (n *LocalHost) Fetch(_ string) common.Result {
 	allocatableMilliCPU, requestedMilliCPU := n.MilliCPU()
 	allocatableMemory, requestedMemory := n.Memory()
 	allocatableStorage, requestedStorage := n.Storage()
 
-	result := proto.Result{
-		AllocatableResource: proto.Resource{
+	result := common.Result{
+		AllocatableResource: plugin.Resource{
 			MilliCPU: allocatableMilliCPU,
 			Memory:   allocatableMemory,
 			Storage:  allocatableStorage,
 		},
-		RequestedResource: proto.Resource{
+		RequestedResource: plugin.Resource{
 			MilliCPU: requestedMilliCPU,
 			Memory:   requestedMemory,
 			Storage:  requestedStorage,
@@ -122,17 +123,17 @@ func (n *LocalHost) Storage() (alloc int64, request int64) {
 
 // nolint:typecheck
 func main() {
-	config := plugin.HandshakeConfig{
+	config := gop.HandshakeConfig{
 		ProtocolVersion:  1,
 		MagicCookieKey:   "plugin-fetch",
 		MagicCookieValue: "plugin-fetch",
 	}
 
-	pluginMap := map[string]plugin.Plugin{
-		"LocalHost": &proto.FetchPlugin{Impl: &LocalHost{}},
+	pluginMap := map[string]gop.Plugin{
+		"LocalHost": &common.FetchPlugin{Impl: &LocalHost{}},
 	}
 
-	plugin.Serve(&plugin.ServeConfig{
+	gop.Serve(&gop.ServeConfig{
 		HandshakeConfig: config,
 		Plugins:         pluginMap,
 	})

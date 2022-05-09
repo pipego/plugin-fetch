@@ -8,10 +8,11 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hashicorp/go-plugin"
+	gop "github.com/hashicorp/go-plugin"
 	"github.com/pkg/errors"
 
-	"github.com/pipego/plugin-fetch/proto"
+	"github.com/pipego/plugin-fetch/common"
+	"github.com/pipego/scheduler/plugin"
 )
 
 const (
@@ -25,21 +26,21 @@ type MetalFlow struct {
 	token string
 }
 
-func (n *MetalFlow) Fetch(host string) proto.Result {
+func (n *MetalFlow) Fetch(host string) common.Result {
 	var err error
 	n.host = host
 
 	n.token, err = n.login()
 	if err != nil {
-		return proto.Result{}
+		return common.Result{}
 	}
 
 	allocatable, requested, err := n.node()
 	if err != nil {
-		return proto.Result{}
+		return common.Result{}
 	}
 
-	return proto.Result{
+	return common.Result{
 		AllocatableResource: allocatable,
 		RequestedResource:   requested,
 	}
@@ -146,10 +147,10 @@ func (n *MetalFlow) idempotenceToken(token string) (string, error) {
 	return data["result"].(string), nil
 }
 
-func (n *MetalFlow) node() (alloc proto.Resource, request proto.Resource, err error) {
+func (n *MetalFlow) node() (alloc plugin.Resource, request plugin.Resource, err error) {
 	req, err := http.NewRequest(http.MethodGet, URL+"/api/v1/node/list?address="+n.host, nil)
 	if err != nil {
-		return proto.Resource{}, proto.Resource{}, errors.Wrap(err, "failed to request\n")
+		return plugin.Resource{}, plugin.Resource{}, errors.Wrap(err, "failed to request\n")
 	}
 
 	req.Header.Add("Authorization", "Bearer "+n.token)
@@ -157,7 +158,7 @@ func (n *MetalFlow) node() (alloc proto.Resource, request proto.Resource, err er
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return proto.Resource{}, proto.Resource{}, errors.Wrap(err, "failed to get\n")
+		return plugin.Resource{}, plugin.Resource{}, errors.Wrap(err, "failed to get\n")
 	}
 
 	defer func() {
@@ -165,26 +166,26 @@ func (n *MetalFlow) node() (alloc proto.Resource, request proto.Resource, err er
 	}()
 
 	if resp.StatusCode != http.StatusOK {
-		return proto.Resource{}, proto.Resource{}, errors.Wrap(err, "invalid status\n")
+		return plugin.Resource{}, plugin.Resource{}, errors.Wrap(err, "invalid status\n")
 	}
 
 	ret, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return proto.Resource{}, proto.Resource{}, errors.Wrap(err, "failed to read\n")
+		return plugin.Resource{}, plugin.Resource{}, errors.Wrap(err, "failed to read\n")
 	}
 
 	data := make(map[string]interface{})
 	if err := json.Unmarshal(ret, &data); err != nil {
-		return proto.Resource{}, proto.Resource{}, errors.Wrap(err, "failed to unmarshal\n")
+		return plugin.Resource{}, plugin.Resource{}, errors.Wrap(err, "failed to unmarshal\n")
 	}
 
 	if int(data["code"].(float64)) != 201 {
-		return proto.Resource{}, proto.Resource{}, errors.Wrap(err, "incorrect code\n")
+		return plugin.Resource{}, plugin.Resource{}, errors.Wrap(err, "incorrect code\n")
 	}
 
 	list := data["result"].(map[string]interface{})["list"].([]interface{})
 	if len(list) != 1 {
-		return proto.Resource{}, proto.Resource{}, errors.New("incorrect result\n")
+		return plugin.Resource{}, plugin.Resource{}, errors.New("incorrect result\n")
 	}
 
 	buf := list[0].(map[string]interface{})
@@ -192,18 +193,18 @@ func (n *MetalFlow) node() (alloc proto.Resource, request proto.Resource, err er
 
 	alloc, err = n.allocHelper(info)
 	if err != nil {
-		return proto.Resource{}, proto.Resource{}, errors.New("incorrect alloc\n")
+		return plugin.Resource{}, plugin.Resource{}, errors.New("incorrect alloc\n")
 	}
 
 	request, err = n.requestHelper(info)
 	if err != nil {
-		return proto.Resource{}, proto.Resource{}, errors.New("incorrect request\n")
+		return plugin.Resource{}, plugin.Resource{}, errors.New("incorrect request\n")
 	}
 
 	return alloc, request, nil
 }
 
-func (n *MetalFlow) allocHelper(info map[string]interface{}) (proto.Resource, error) {
+func (n *MetalFlow) allocHelper(info map[string]interface{}) (plugin.Resource, error) {
 	// "4 CPU (2.1% Used)"
 	cpuHelper := func(data string) int64 {
 		buf := strings.Split(data, " ")
@@ -234,14 +235,14 @@ func (n *MetalFlow) allocHelper(info map[string]interface{}) (proto.Resource, er
 		return int64(b * 1024 * 1024 * 1024)
 	}
 
-	return proto.Resource{
+	return plugin.Resource{
 		MilliCPU: cpuHelper(info["cpu"].(string)),
 		Memory:   memoryHelper(info["ram"].(string)),
 		Storage:  storageHelper(info["disk"].(string)),
 	}, nil
 }
 
-func (n *MetalFlow) requestHelper(info map[string]interface{}) (proto.Resource, error) {
+func (n *MetalFlow) requestHelper(info map[string]interface{}) (plugin.Resource, error) {
 	// "4 CPU (2.1% Used)"
 	cpuHelper := func(data string) int64 {
 		buf := strings.Split(data, " ")
@@ -277,7 +278,7 @@ func (n *MetalFlow) requestHelper(info map[string]interface{}) (proto.Resource, 
 		return int64(b * 1024 * 1024 * 1024)
 	}
 
-	return proto.Resource{
+	return plugin.Resource{
 		MilliCPU: cpuHelper(info["cpu"].(string)),
 		Memory:   memoryHelper(info["ram"].(string)),
 		Storage:  storageHelper(info["disk"].(string)),
@@ -286,17 +287,17 @@ func (n *MetalFlow) requestHelper(info map[string]interface{}) (proto.Resource, 
 
 // nolint:typecheck
 func main() {
-	config := plugin.HandshakeConfig{
+	config := gop.HandshakeConfig{
 		ProtocolVersion:  1,
 		MagicCookieKey:   "plugin-fetch",
 		MagicCookieValue: "plugin-fetch",
 	}
 
-	pluginMap := map[string]plugin.Plugin{
-		"MetalFlow": &proto.FetchPlugin{Impl: &MetalFlow{}},
+	pluginMap := map[string]gop.Plugin{
+		"MetalFlow": &common.FetchPlugin{Impl: &MetalFlow{}},
 	}
 
-	plugin.Serve(&plugin.ServeConfig{
+	gop.Serve(&gop.ServeConfig{
 		HandshakeConfig: config,
 		Plugins:         pluginMap,
 	})
