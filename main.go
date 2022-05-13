@@ -43,12 +43,12 @@ func main() {
 func helper(path, name string) (plugin.FetchResult, error) {
 	config := gop.HandshakeConfig{
 		ProtocolVersion:  1,
-		MagicCookieKey:   "plugin-fetch",
-		MagicCookieValue: "plugin-fetch",
+		MagicCookieKey:   "plugin",
+		MagicCookieValue: "plugin",
 	}
 
 	logger := hclog.New(&hclog.LoggerOptions{
-		Name:   "plugin-fetch",
+		Name:   "plugin",
 		Output: os.Stderr,
 		Level:  hclog.Error,
 	})
