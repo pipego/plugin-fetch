@@ -79,8 +79,8 @@ github.com/mitchellh/go-testing-interface v0.0.0-20171004221916-a61a99592b77 h1:
 github.com/mitchellh/go-testing-interface v0.0.0-20171004221916-a61a99592b77/go.mod h1:kRemZodwjscx+RGhAo8eIhFbs2+BFgRtFPeD/KE+zxI=
 github.com/oklog/run v1.0.0 h1:Ru7dDtJNOyC66gQ5dQmaCa0qIsAUFY3sFpK1Xk8igrw=
 github.com/oklog/run v1.0.0/go.mod h1:dlhp/R75TPv97u0XWUtDeV/lRKWPKSdTuV0TZvrmrQA=
-github.com/pipego/scheduler v0.0.0-20220509051026-8fac024c0e41 h1:y2OPKoAeCjfizrW6STJ+uRu9vekbJIEZscjnqStEqbk=
-github.com/pipego/scheduler v0.0.0-20220509051026-8fac024c0e41/go.mod h1:RkL70AcnscOF7DBCoXm7BVcIz+/ooLz1bvHT3NnF49M=
+github.com/pipego/scheduler v0.2.0 h1:upMAZv00FDdKRpvVO7MEeM7YSEcKsFkEzSFXIwuLH80=
+github.com/pipego/scheduler v0.2.0/go.mod h1:RkL70AcnscOF7DBCoXm7BVcIz+/ooLz1bvHT3NnF49M=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=

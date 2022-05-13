@@ -26,21 +26,21 @@ type MetalFlow struct {
 	token string
 }
 
-func (n *MetalFlow) Fetch(host string) common.Result {
+func (n *MetalFlow) Run(host string) plugin.FetchResult {
 	var err error
 	n.host = host
 
 	n.token, err = n.login()
 	if err != nil {
-		return common.Result{}
+		return plugin.FetchResult{}
 	}
 
 	allocatable, requested, err := n.node()
 	if err != nil {
-		return common.Result{}
+		return plugin.FetchResult{}
 	}
 
-	return common.Result{
+	return plugin.FetchResult{
 		AllocatableResource: allocatable,
 		RequestedResource:   requested,
 	}

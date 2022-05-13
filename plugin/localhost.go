@@ -26,12 +26,12 @@ const (
 
 type LocalHost struct{}
 
-func (n *LocalHost) Fetch(_ string) common.Result {
+func (n *LocalHost) Run(_ string) plugin.FetchResult {
 	allocatableMilliCPU, requestedMilliCPU := n.MilliCPU()
 	allocatableMemory, requestedMemory := n.Memory()
 	allocatableStorage, requestedStorage := n.Storage()
 
-	result := common.Result{
+	result := plugin.FetchResult{
 		AllocatableResource: plugin.Resource{
 			MilliCPU: allocatableMilliCPU,
 			Memory:   allocatableMemory,

@@ -9,6 +9,7 @@ import (
 	gop "github.com/hashicorp/go-plugin"
 
 	"github.com/pipego/plugin-fetch/common"
+	"github.com/pipego/scheduler/plugin"
 )
 
 type config struct {
@@ -40,7 +41,7 @@ func main() {
 	}
 }
 
-func helper(path, name string) (common.Result, error) {
+func helper(path, name string) (plugin.FetchResult, error) {
 	config := gop.HandshakeConfig{
 		ProtocolVersion:  1,
 		MagicCookieKey:   "plugin-fetch",
@@ -67,8 +68,8 @@ func helper(path, name string) (common.Result, error) {
 
 	rpcClient, _ := client.Client()
 	raw, _ := rpcClient.Dispense(name)
-	n := raw.(common.Fetch)
-	result := n.Fetch("127.0.0.1")
+	n := raw.(plugin.FetchPlugin)
+	result := n.Run("127.0.0.1")
 
 	return result, nil
 }
