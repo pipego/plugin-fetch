@@ -289,8 +289,8 @@ func (n *MetalFlow) requestHelper(info map[string]interface{}) (common.Resource,
 func main() {
 	config := gop.HandshakeConfig{
 		ProtocolVersion:  1,
-		MagicCookieKey:   "plugin-fetch",
-		MagicCookieValue: "plugin-fetch",
+		MagicCookieKey:   "plugin",
+		MagicCookieValue: "plugin",
 	}
 
 	pluginMap := map[string]gop.Plugin{

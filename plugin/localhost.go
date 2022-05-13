@@ -125,8 +125,8 @@ func (n *LocalHost) Storage() (alloc int64, request int64) {
 func main() {
 	config := gop.HandshakeConfig{
 		ProtocolVersion:  1,
-		MagicCookieKey:   "plugin-fetch",
-		MagicCookieValue: "plugin-fetch",
+		MagicCookieKey:   "plugin",
+		MagicCookieValue: "plugin",
 	}
 
 	pluginMap := map[string]gop.Plugin{
