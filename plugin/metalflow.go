@@ -11,7 +11,7 @@ import (
 	gop "github.com/hashicorp/go-plugin"
 	"github.com/pkg/errors"
 
-	"github.com/pipego/plugin-fetch/common"
+	"github.com/pipego/scheduler/common"
 	"github.com/pipego/scheduler/plugin"
 )
 
@@ -147,10 +147,10 @@ func (n *MetalFlow) idempotenceToken(token string) (string, error) {
 	return data["result"].(string), nil
 }
 
-func (n *MetalFlow) node() (alloc plugin.Resource, request plugin.Resource, err error) {
+func (n *MetalFlow) node() (alloc common.Resource, request common.Resource, err error) {
 	req, err := http.NewRequest(http.MethodGet, URL+"/api/v1/node/list?address="+n.host, nil)
 	if err != nil {
-		return plugin.Resource{}, plugin.Resource{}, errors.Wrap(err, "failed to request\n")
+		return common.Resource{}, common.Resource{}, errors.Wrap(err, "failed to request\n")
 	}
 
 	req.Header.Add("Authorization", "Bearer "+n.token)
@@ -158,7 +158,7 @@ func (n *MetalFlow) node() (alloc plugin.Resource, request plugin.Resource, err 
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return plugin.Resource{}, plugin.Resource{}, errors.Wrap(err, "failed to get\n")
+		return common.Resource{}, common.Resource{}, errors.Wrap(err, "failed to get\n")
 	}
 
 	defer func() {
@@ -166,26 +166,26 @@ func (n *MetalFlow) node() (alloc plugin.Resource, request plugin.Resource, err 
 	}()
 
 	if resp.StatusCode != http.StatusOK {
-		return plugin.Resource{}, plugin.Resource{}, errors.Wrap(err, "invalid status\n")
+		return common.Resource{}, common.Resource{}, errors.Wrap(err, "invalid status\n")
 	}
 
 	ret, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return plugin.Resource{}, plugin.Resource{}, errors.Wrap(err, "failed to read\n")
+		return common.Resource{}, common.Resource{}, errors.Wrap(err, "failed to read\n")
 	}
 
 	data := make(map[string]interface{})
 	if err := json.Unmarshal(ret, &data); err != nil {
-		return plugin.Resource{}, plugin.Resource{}, errors.Wrap(err, "failed to unmarshal\n")
+		return common.Resource{}, common.Resource{}, errors.Wrap(err, "failed to unmarshal\n")
 	}
 
 	if int(data["code"].(float64)) != 201 {
-		return plugin.Resource{}, plugin.Resource{}, errors.Wrap(err, "incorrect code\n")
+		return common.Resource{}, common.Resource{}, errors.Wrap(err, "incorrect code\n")
 	}
 
 	list := data["result"].(map[string]interface{})["list"].([]interface{})
 	if len(list) != 1 {
-		return plugin.Resource{}, plugin.Resource{}, errors.New("incorrect result\n")
+		return common.Resource{}, common.Resource{}, errors.New("incorrect result\n")
 	}
 
 	buf := list[0].(map[string]interface{})
@@ -193,18 +193,18 @@ func (n *MetalFlow) node() (alloc plugin.Resource, request plugin.Resource, err 
 
 	alloc, err = n.allocHelper(info)
 	if err != nil {
-		return plugin.Resource{}, plugin.Resource{}, errors.New("incorrect alloc\n")
+		return common.Resource{}, common.Resource{}, errors.New("incorrect alloc\n")
 	}
 
 	request, err = n.requestHelper(info)
 	if err != nil {
-		return plugin.Resource{}, plugin.Resource{}, errors.New("incorrect request\n")
+		return common.Resource{}, common.Resource{}, errors.New("incorrect request\n")
 	}
 
 	return alloc, request, nil
 }
 
-func (n *MetalFlow) allocHelper(info map[string]interface{}) (plugin.Resource, error) {
+func (n *MetalFlow) allocHelper(info map[string]interface{}) (common.Resource, error) {
 	// "4 CPU (2.1% Used)"
 	cpuHelper := func(data string) int64 {
 		buf := strings.Split(data, " ")
@@ -235,14 +235,14 @@ func (n *MetalFlow) allocHelper(info map[string]interface{}) (plugin.Resource, e
 		return int64(b * 1024 * 1024 * 1024)
 	}
 
-	return plugin.Resource{
+	return common.Resource{
 		MilliCPU: cpuHelper(info["cpu"].(string)),
 		Memory:   memoryHelper(info["ram"].(string)),
 		Storage:  storageHelper(info["disk"].(string)),
 	}, nil
 }
 
-func (n *MetalFlow) requestHelper(info map[string]interface{}) (plugin.Resource, error) {
+func (n *MetalFlow) requestHelper(info map[string]interface{}) (common.Resource, error) {
 	// "4 CPU (2.1% Used)"
 	cpuHelper := func(data string) int64 {
 		buf := strings.Split(data, " ")
@@ -278,7 +278,7 @@ func (n *MetalFlow) requestHelper(info map[string]interface{}) (plugin.Resource,
 		return int64(b * 1024 * 1024 * 1024)
 	}
 
-	return plugin.Resource{
+	return common.Resource{
 		MilliCPU: cpuHelper(info["cpu"].(string)),
 		Memory:   memoryHelper(info["ram"].(string)),
 		Storage:  storageHelper(info["disk"].(string)),
@@ -294,7 +294,7 @@ func main() {
 	}
 
 	pluginMap := map[string]gop.Plugin{
-		"MetalFlow": &common.FetchPlugin{Impl: &MetalFlow{}},
+		"MetalFlow": &plugin.Fetch{Impl: &MetalFlow{}},
 	}
 
 	gop.Serve(&gop.ServeConfig{

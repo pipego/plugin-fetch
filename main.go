@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/go-hclog"
 	gop "github.com/hashicorp/go-plugin"
 
-	"github.com/pipego/plugin-fetch/common"
 	"github.com/pipego/scheduler/plugin"
 )
 
@@ -55,7 +54,7 @@ func helper(path, name string) (plugin.FetchResult, error) {
 	})
 
 	plugins := map[string]gop.Plugin{
-		name: &common.FetchPlugin{},
+		name: &plugin.Fetch{},
 	}
 
 	client := gop.NewClient(&gop.ClientConfig{

@@ -3,9 +3,9 @@ module github.com/pipego/plugin-fetch
 go 1.17
 
 require (
-	github.com/hashicorp/go-hclog v0.14.1
+	github.com/hashicorp/go-hclog v1.2.0
 	github.com/hashicorp/go-plugin v1.4.4
-	github.com/pipego/scheduler v0.2.0
+	github.com/pipego/scheduler v0.4.0
 	github.com/pkg/errors v0.9.1
 	github.com/shirou/gopsutil/v3 v3.22.4
 )

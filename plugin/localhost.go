@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/pipego/scheduler/common"
 	"math"
 	"strings"
 
@@ -9,7 +10,6 @@ import (
 	"github.com/shirou/gopsutil/v3/disk"
 	"github.com/shirou/gopsutil/v3/mem"
 
-	"github.com/pipego/plugin-fetch/common"
 	"github.com/pipego/scheduler/plugin"
 )
 
@@ -32,12 +32,12 @@ func (n *LocalHost) Run(_ string) plugin.FetchResult {
 	allocatableStorage, requestedStorage := n.Storage()
 
 	result := plugin.FetchResult{
-		AllocatableResource: plugin.Resource{
+		AllocatableResource: common.Resource{
 			MilliCPU: allocatableMilliCPU,
 			Memory:   allocatableMemory,
 			Storage:  allocatableStorage,
 		},
-		RequestedResource: plugin.Resource{
+		RequestedResource: common.Resource{
 			MilliCPU: requestedMilliCPU,
 			Memory:   requestedMemory,
 			Storage:  requestedStorage,
@@ -130,7 +130,7 @@ func main() {
 	}
 
 	pluginMap := map[string]gop.Plugin{
-		"LocalHost": &common.FetchPlugin{Impl: &LocalHost{}},
+		"LocalHost": &plugin.Fetch{Impl: &LocalHost{}},
 	}
 
 	gop.Serve(&gop.ServeConfig{
