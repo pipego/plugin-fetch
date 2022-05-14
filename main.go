@@ -67,7 +67,7 @@ func helper(path, name string) (plugin.FetchResult, error) {
 
 	rpcClient, _ := client.Client()
 	raw, _ := rpcClient.Dispense(name)
-	n := raw.(plugin.FetchPlugin)
+	n := raw.(plugin.FetchImpl)
 	result := n.Run("127.0.0.1")
 
 	return result, nil
