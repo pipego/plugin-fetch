@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/pipego/scheduler/common"
 	"math"
 	"strings"
 
@@ -10,6 +9,7 @@ import (
 	"github.com/shirou/gopsutil/v3/disk"
 	"github.com/shirou/gopsutil/v3/mem"
 
+	"github.com/pipego/scheduler/common"
 	"github.com/pipego/scheduler/plugin"
 )
 
