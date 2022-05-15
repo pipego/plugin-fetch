@@ -1,0 +1,20 @@
+---
+builds:
+  - env: [CGO_ENABLED=0]
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - amd64
+    main: .
+    flags:
+      - -trimpath
+    ldflags: -s -w -X config.Build={{.Date}} -X config.Version={{.Version}}
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - Merge pull request
+      - Merge branch
