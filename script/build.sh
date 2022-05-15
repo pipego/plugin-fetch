@@ -9,11 +9,13 @@ filepath="plugin"
 for item in "$filepath"/*.go; do
   buf=${item%.go}
   name=${buf##*/}
-  CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build -ldflags "$ldflags" -o plugin/fetch-"$name" plugin/"$name".go
+  # go tool dist list
+  CGO_ENABLED=0 GOARCH=$(go env GOARCH) GOOS=$(go env GOOS) go build -ldflags "$ldflags" -o plugin/fetch-"$name" plugin/"$name".go
   upx plugin/fetch-"$name"
 done
 
 # Test
 target="plugin-fetch-test"
-CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build -ldflags "$ldflags" -o $target main.go
+# go tool dist list
+CGO_ENABLED=0 GOARCH=$(go env GOARCH) GOOS=$(go env GOOS) go build -ldflags "$ldflags" -o $target main.go
 upx $target
