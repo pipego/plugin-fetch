@@ -1,13 +1,47 @@
 ---
 builds:
-  - env: [CGO_ENABLED=0]
+  - id: plugin-fetch-test
+    env:
+      - CGO_ENABLED=0
     goos:
       - darwin
       - linux
       - windows
     goarch:
       - amd64
-    main: .
+    dir: .
+    main: main.go
+    binary: plugin-fetch-test
+    flags:
+      - -trimpath
+    ldflags: -s -w -X config.Build={{.Date}} -X config.Version={{.Version}}
+  - id: fetch-localhost
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - amd64
+    dir: plugin
+    main: localhost.go
+    binary: fetch-localhost
+    flags:
+      - -trimpath
+    ldflags: -s -w -X config.Build={{.Date}} -X config.Version={{.Version}}
+  - id: fetch-metalflow
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - amd64
+    dir: plugin
+    main: metalflow.go
+    binary: fetch-metalflow
     flags:
       - -trimpath
     ldflags: -s -w -X config.Build={{.Date}} -X config.Version={{.Version}}
