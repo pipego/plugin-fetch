@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 
 	"github.com/hashicorp/go-hclog"
 	gop "github.com/hashicorp/go-plugin"
+	"github.com/pkg/errors"
 
 	"github.com/pipego/scheduler/plugin"
 )
@@ -45,10 +47,13 @@ var (
 
 func main() {
 	for _, item := range configs {
-		result, _ := helper(item.path, item.name)
-
-		fmt.Println(result.AllocatableResource.MilliCPU, result.AllocatableResource.Memory, result.AllocatableResource.Storage)
-		fmt.Println(result.RequestedResource.MilliCPU, result.RequestedResource.Memory, result.RequestedResource.Storage)
+		p, _ := filepath.Abs(item.path)
+		if result, err := helper(p, item.name); err == nil {
+			fmt.Println(result.AllocatableResource.MilliCPU, result.AllocatableResource.Memory, result.AllocatableResource.Storage)
+			fmt.Println(result.RequestedResource.MilliCPU, result.RequestedResource.Memory, result.RequestedResource.Storage)
+		} else {
+			fmt.Println(err.Error())
+		}
 	}
 }
 
@@ -65,8 +70,16 @@ func helper(path, name string) (plugin.FetchResult, error) {
 	})
 	defer client.Kill()
 
-	rpcClient, _ := client.Client()
-	raw, _ := rpcClient.Dispense(name)
+	rpcClient, err := client.Client()
+	if err != nil {
+		return plugin.FetchResult{}, errors.Wrap(err, "failed to init client")
+	}
+
+	raw, err := rpcClient.Dispense(name)
+	if err != nil {
+		return plugin.FetchResult{}, errors.Wrap(err, "failed to dispense instance")
+	}
+
 	n := raw.(plugin.FetchImpl)
 	result := n.Run("127.0.0.1")
 
