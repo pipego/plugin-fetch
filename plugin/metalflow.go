@@ -52,11 +52,6 @@ func (n *MetalFlow) login() (string, error) {
 		return "", errors.Wrap(err, "failed to fetch jwt token")
 	}
 
-	token, err = n.idempotenceToken(token)
-	if err != nil {
-		return "", errors.Wrap(err, "failed to fetch idempotence token")
-	}
-
 	return token, nil
 }
 
@@ -106,45 +101,6 @@ func (n *MetalFlow) jwtToken() (string, error) {
 	}
 
 	return data["result"].(map[string]interface{})["token"].(string), nil
-}
-
-func (n *MetalFlow) idempotenceToken(token string) (string, error) {
-	req, err := http.NewRequest(http.MethodGet, URL+"/api/v1/base/idempotenceToken", nil)
-	if err != nil {
-		return "", errors.Wrap(err, "failed to request\n")
-	}
-
-	req.Header.Add("Authorization", "Bearer "+token)
-	req.Header.Add("Content-Type", "application/json")
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return "", errors.Wrap(err, "failed to get\n")
-	}
-
-	defer func() {
-		_ = resp.Body.Close()
-	}()
-
-	if resp.StatusCode != http.StatusOK {
-		return "", errors.New("invalid status\n")
-	}
-
-	ret, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return "", errors.Wrap(err, "failed to read\n")
-	}
-
-	data := make(map[string]interface{})
-	if err := json.Unmarshal(ret, &data); err != nil {
-		return "", errors.Wrap(err, "failed to unmarshal\n")
-	}
-
-	if int(data["code"].(float64)) != 201 {
-		return "", errors.New("incorrect code\n")
-	}
-
-	return data["result"].(string), nil
 }
 
 func (n *MetalFlow) node() (alloc common.Resource, request common.Resource, err error) {
