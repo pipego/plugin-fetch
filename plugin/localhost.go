@@ -16,6 +16,7 @@ import (
 const (
 	// DURATION Duration: 10s = 10*1000ms = 10*1000000000ns
 	DURATION = 10 * 1000000000
+	MILLI    = 1000
 )
 
 const (
@@ -47,13 +48,13 @@ func (n *LocalHost) Run(_ string) plugin.FetchResult {
 	return result
 }
 
-func (n *LocalHost) MilliCPU() (alloc int64, request int64) {
+func (n *LocalHost) MilliCPU() (alloc, request int64) {
 	c, err := cpu.Counts(true)
 	if err != nil {
 		return -1, -1
 	}
 
-	if c*1000 > math.MaxInt64 {
+	if c*MILLI > math.MaxInt64 {
 		return -1, -1
 	}
 
@@ -68,10 +69,10 @@ func (n *LocalHost) MilliCPU() (alloc int64, request int64) {
 		return -1, -1
 	}
 
-	return int64(c * 1000), int64(used * 1000)
+	return int64(c * MILLI), int64(used * MILLI)
 }
 
-func (n *LocalHost) Memory() (alloc int64, request int64) {
+func (n *LocalHost) Memory() (alloc, request int64) {
 	v, err := mem.VirtualMemory()
 	if err != nil {
 		return -1, -1
@@ -84,7 +85,7 @@ func (n *LocalHost) Memory() (alloc int64, request int64) {
 	return int64(v.Total), int64(v.Used)
 }
 
-func (n *LocalHost) Storage() (alloc int64, request int64) {
+func (n *LocalHost) Storage() (alloc, request int64) {
 	helper := func(path string) bool {
 		found := false
 		p, _ := disk.Partitions(false)
