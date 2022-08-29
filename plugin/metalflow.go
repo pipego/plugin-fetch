@@ -16,9 +16,9 @@ import (
 )
 
 const (
-	URL  = "http://127.0.0.1:4523/mock/954718"
-	USER = "user"
-	PASS = "pass"
+	Url  = "http://127.0.0.1:4523/mock/954718"
+	User = "user"
+	Pass = "pass"
 )
 
 type MetalFlow struct {
@@ -57,8 +57,8 @@ func (n *MetalFlow) login() (string, error) {
 
 func (n *MetalFlow) jwtToken() (string, error) {
 	buf := map[string]string{
-		"username": USER,
-		"password": PASS,
+		"username": User,
+		"password": Pass,
 	}
 
 	body, err := json.Marshal(buf)
@@ -66,7 +66,7 @@ func (n *MetalFlow) jwtToken() (string, error) {
 		return "", errors.Wrap(err, "failed to marshal\n")
 	}
 
-	req, err := http.NewRequest(http.MethodPost, URL+"/api/v1/base/login", bytes.NewBuffer(body))
+	req, err := http.NewRequest(http.MethodPost, Url+"/api/v1/base/login", bytes.NewBuffer(body))
 	if err != nil {
 		return "", errors.Wrap(err, "failed to request\n")
 	}
@@ -104,7 +104,7 @@ func (n *MetalFlow) jwtToken() (string, error) {
 }
 
 func (n *MetalFlow) node() (alloc common.Resource, request common.Resource, err error) {
-	req, err := http.NewRequest(http.MethodGet, URL+"/api/v1/node/list?address="+n.host, nil)
+	req, err := http.NewRequest(http.MethodGet, Url+"/api/v1/node/list?address="+n.host, nil)
 	if err != nil {
 		return common.Resource{}, common.Resource{}, errors.Wrap(err, "failed to request\n")
 	}
