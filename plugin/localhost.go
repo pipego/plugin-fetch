@@ -1,3 +1,4 @@
+//nolint:typecheck
 package main
 
 import (
@@ -122,7 +123,6 @@ func (n *LocalHost) Storage() (alloc, request int64) {
 	return int64(total), int64(used)
 }
 
-// nolint:typecheck
 func main() {
 	config := gop.HandshakeConfig{
 		ProtocolVersion:  1,

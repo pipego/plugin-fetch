@@ -1,3 +1,4 @@
+//nolint:typecheck
 package main
 
 import (
@@ -241,7 +242,6 @@ func (n *MetalFlow) requestHelper(info map[string]interface{}) (common.Resource,
 	}, nil
 }
 
-// nolint:typecheck
 func main() {
 	config := gop.HandshakeConfig{
 		ProtocolVersion:  1,
