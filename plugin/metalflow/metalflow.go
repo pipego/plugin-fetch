@@ -4,7 +4,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -17,9 +17,11 @@ import (
 )
 
 const (
-	Url  = "http://127.0.0.1:4523/mock/954718"
-	User = "user"
-	Pass = "pass"
+	url  = "http://127.0.0.1:4523/mock/954718"
+	user = "user"
+	pass = "pass"
+
+	code = 201
 )
 
 type MetalFlow struct {
@@ -58,8 +60,8 @@ func (n *MetalFlow) login() (string, error) {
 
 func (n *MetalFlow) jwtToken() (string, error) {
 	buf := map[string]string{
-		"username": User,
-		"password": Pass,
+		"username": user,
+		"password": pass,
 	}
 
 	body, err := json.Marshal(buf)
@@ -67,7 +69,7 @@ func (n *MetalFlow) jwtToken() (string, error) {
 		return "", errors.Wrap(err, "failed to marshal\n")
 	}
 
-	req, err := http.NewRequest(http.MethodPost, Url+"/api/v1/base/login", bytes.NewBuffer(body))
+	req, err := http.NewRequest(http.MethodPost, url+"/api/v1/base/login", bytes.NewBuffer(body))
 	if err != nil {
 		return "", errors.Wrap(err, "failed to request\n")
 	}
@@ -87,7 +89,7 @@ func (n *MetalFlow) jwtToken() (string, error) {
 		return "", errors.New("invalid status\n")
 	}
 
-	ret, err := ioutil.ReadAll(resp.Body)
+	ret, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", errors.Wrap(err, "failed to read\n")
 	}
@@ -97,15 +99,15 @@ func (n *MetalFlow) jwtToken() (string, error) {
 		return "", errors.Wrap(err, "failed to unmarshal\n")
 	}
 
-	if int(data["code"].(float64)) != 201 {
+	if int(data["code"].(float64)) != code {
 		return "", errors.New("incorrect code\n")
 	}
 
 	return data["result"].(map[string]interface{})["token"].(string), nil
 }
 
-func (n *MetalFlow) node() (alloc common.Resource, request common.Resource, err error) {
-	req, err := http.NewRequest(http.MethodGet, Url+"/api/v1/node/list?address="+n.host, nil)
+func (n *MetalFlow) node() (alloc, request common.Resource, err error) {
+	req, err := http.NewRequest(http.MethodGet, url+"/api/v1/node/list?address="+n.host, http.NoBody)
 	if err != nil {
 		return common.Resource{}, common.Resource{}, errors.Wrap(err, "failed to request\n")
 	}
@@ -126,7 +128,7 @@ func (n *MetalFlow) node() (alloc common.Resource, request common.Resource, err 
 		return common.Resource{}, common.Resource{}, errors.Wrap(err, "invalid status\n")
 	}
 
-	ret, err := ioutil.ReadAll(resp.Body)
+	ret, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return common.Resource{}, common.Resource{}, errors.Wrap(err, "failed to read\n")
 	}
@@ -136,7 +138,7 @@ func (n *MetalFlow) node() (alloc common.Resource, request common.Resource, err 
 		return common.Resource{}, common.Resource{}, errors.Wrap(err, "failed to unmarshal\n")
 	}
 
-	if int(data["code"].(float64)) != 201 {
+	if int(data["code"].(float64)) != code {
 		return common.Resource{}, common.Resource{}, errors.Wrap(err, "incorrect code\n")
 	}
 
@@ -161,6 +163,7 @@ func (n *MetalFlow) node() (alloc common.Resource, request common.Resource, err 
 	return alloc, request, nil
 }
 
+// nolint:mnd
 func (n *MetalFlow) allocHelper(info map[string]interface{}) (common.Resource, error) {
 	// "4 CPU (2.1% Used)"
 	cpuHelper := func(data string) int64 {
@@ -199,6 +202,7 @@ func (n *MetalFlow) allocHelper(info map[string]interface{}) (common.Resource, e
 	}, nil
 }
 
+// nolint:mnd
 func (n *MetalFlow) requestHelper(info map[string]interface{}) (common.Resource, error) {
 	// "4 CPU (2.1% Used)"
 	cpuHelper := func(data string) int64 {
